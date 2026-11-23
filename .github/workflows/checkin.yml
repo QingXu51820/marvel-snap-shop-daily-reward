@@ -22,6 +22,7 @@ jobs:
     timeout-minutes: 10
     env:
       MARVEL_SNAP_AUTH_JSON: ${{ secrets.MARVEL_SNAP_AUTH_JSON }}
+      MARVEL_SNAP_SHOP_SESSION: ${{ secrets.MARVEL_SNAP_SHOP_SESSION }}
       MARVEL_SNAP_PROXY: ${{ secrets.MARVEL_SNAP_PROXY }}
       TZ: Asia/Shanghai
 

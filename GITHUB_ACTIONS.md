@@ -14,14 +14,19 @@ GitHub 的定时任务可能延迟开始，因此 21:10 的第二次运行用于
 ## 首次配置
 
 1. Fork 或使用本仓库模板创建自己的仓库。
-2. 运行 `npm ci` 和 `npm run login`，生成自己的 `auth.json`。
-3. 把 `auth.json` 的内容写入自己仓库的 Actions Secret：
+2. 登录网页商店，按 `F12` 打开 `Network`。
+3. 刷新页面，点击 `catalog?lang=zh-CN` 请求。
+4. 在 `Headers → Request Headers → Cookie` 中找到 `shop_session`。
+5. 把 `shop_session` 的值保存为仓库 Secret：
 
 ```powershell
-Get-Content -Raw .\auth.json | gh secret set MARVEL_SNAP_AUTH_JSON
+gh secret set MARVEL_SNAP_SHOP_SESSION
 ```
 
-4. 如果需要固定代理，再设置可选 Secret：
+也可以使用完整的 Playwright `auth.json`，保存为另一个 Secret
+`MARVEL_SNAP_AUTH_JSON`。两种方式二选一即可。
+
+6. 如果需要固定代理，再设置可选 Secret：
 
 ```powershell
 gh secret set MARVEL_SNAP_PROXY --body "http://proxy-host:port"
@@ -33,7 +38,7 @@ GitHub 托管运行器通常可以直连商店。如果日志出现 `HTTP 451`�
 ## 安全边界
 
 - 不提交账号密码。
-- 不提交 `auth.json`。
+- 不提交 `auth.json` 或 `shop_session`。
 - 不提交 `profile/`、日志或本地运行结果。
 - 过期检查与领取后复核仍使用 `available` 字段。
 - `auth.json` 过期后，需要重新运行本地 `login.ps1`，再用上面的命令更新 Secret。

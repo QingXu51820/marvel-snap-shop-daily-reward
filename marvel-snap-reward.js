@@ -33,6 +33,40 @@ async function loadStorageState() {
     return { state, fromEnvironment: true };
   }
 
+  const rawSession = process.env.MARVEL_SNAP_SHOP_SESSION;
+  if (rawSession) {
+    let sessionValue = rawSession.trim();
+    if (/^Cookie:\s*/i.test(sessionValue)) {
+      sessionValue = sessionValue.replace(/^Cookie:\s*/i, "");
+    }
+    if (sessionValue.includes("shop_session=")) {
+      const match = sessionValue.match(/(?:^|;\s*)shop_session=([^;\r\n]+)/);
+      if (!match) throw new Error("无法从 Cookie 中读取 shop_session");
+      sessionValue = match[1].trim();
+    }
+    if (!sessionValue) {
+      throw new Error("MARVEL_SNAP_SHOP_SESSION 为空");
+    }
+    return {
+      state: {
+        cookies: [
+          {
+            name: "shop_session",
+            value: sessionValue,
+            domain: "shop.marvelsnap.com",
+            path: "/",
+            expires: -1,
+            httpOnly: true,
+            secure: true,
+            sameSite: "Lax",
+          },
+        ],
+        origins: [],
+      },
+      fromEnvironment: true,
+    };
+  }
+
   return {
     state: JSON.parse(await fs.readFile(AUTH_FILE, "utf8")),
     fromEnvironment: false,
@@ -536,7 +570,7 @@ async function main() {
   try {
     auth = await loadStorageState();
   } catch {
-    await log("[auth] 未找到 auth.json，需要先执行一次登录");
+    await log("[auth] 未找到 cookie 或 auth.json，需要先配置登录态");
     finish(await buildResult("login_required", { signedIn: false }));
     return;
   }

@@ -11,21 +11,40 @@
 ## 复制给其他用户使用
 
 1. 点击仓库顶部的 **Use this template**，或 Fork 本仓库。
-2. 在本地取得自己的网页商店登录态。
-3. 把登录态写入自己仓库的 Actions Secret：
+2. 在浏览器中登录 MARVEL SNAP 网页商店。
+3. 按 `F12` 打开开发者工具，在 `Network` 中打开一个商店 API 请求，
+   从 `Headers → Request Headers → Cookie` 中取得 `shop_session` 的值。
+4. 把 `shop_session` 的值写入自己仓库的 Actions Secret：
 
    `Settings` → `Secrets and variables` → `Actions` → `New repository secret`
 
    名称：
 
    ```text
-   MARVEL_SNAP_AUTH_JSON
+   MARVEL_SNAP_SHOP_SESSION
    ```
 
-   值是 Playwright `storageState` JSON，可通过本仓库脚本生成。
-4. 打开 `Actions` → `MARVEL SNAP Daily Reward` → `Run workflow` 测试。
+   值可以是 `shop_session` 的值，也可以是完整的
+   `shop_session=...` 片段。`shop_session` 是 HttpOnly Cookie，
+   不能通过网页 Console 的 `document.cookie` 获取。
+5. 打开 `Actions` → `MARVEL SNAP Daily Reward` → `Run workflow` 测试。
 
-## 获取自己的登录态
+## 更简单的方式：只复制 Cookie
+
+不需要安装 Node.js 或执行 npm。
+
+1. 登录 `https://shop.marvelsnap.com/zh-CN/`。
+2. 按 `F12`，切换到 `Network`。
+3. 刷新页面，点击名称类似 `catalog?lang=zh-CN` 的请求。
+4. 打开 `Headers`，在 `Request Headers` 中找到 `Cookie`。
+5. 找到 `shop_session=`，复制它的值。
+6. 把值保存到 GitHub Secret `MARVEL_SNAP_SHOP_SESSION`。
+
+Cookie 会过期或失效。届时重新登录、复制新的值，并覆盖 Secret 即可。
+
+## 可选方式：生成完整登录态
+
+如果希望使用完整的 Playwright 登录态，也可以安装 Node.js：
 
 需要 Node.js 20 或更高版本。
 
@@ -91,11 +110,13 @@ npm run claim
 
 当 GitHub Actions 日志显示 `login_required` 或 `HTTP 401` 时：
 
-1. 重新运行 `npm run login`。
-2. 用新的 `auth.json` 更新仓库 Secret `MARVEL_SNAP_AUTH_JSON`。
+1. 使用上面的“只复制 Cookie”方式取得新的 `shop_session`。
+2. 更新仓库 Secret `MARVEL_SNAP_SHOP_SESSION`。
 
 ## 安全
 
-- `auth.json` 包含可登录商店的会话信息，应视同凭据。
+- `shop_session` 是可登录商店的完整会话凭据。
+- 不要把它发在 Issue、Discussion、截图或聊天记录中。
+- `auth.json` 包含与 Cookie 等价的会话信息。
 - `profile/` 包含浏览器登录态，不应提交或分享。
 - 不要在 Issue、Discussion、日志或截图中公开 Secret。
