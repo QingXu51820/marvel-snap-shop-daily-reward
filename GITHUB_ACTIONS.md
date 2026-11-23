@@ -13,9 +13,9 @@ GitHub 的定时任务可能延迟开始，因此 21:10 的第二次运行用于
 
 ## 首次配置
 
-1. 保持本地 `auth.json` 有效。
-2. 在本地登录 GitHub CLI。
-3. 把 `auth.json` 的内容写入私有仓库 Secret：
+1. Fork 或使用本仓库模板创建自己的仓库。
+2. 运行 `npm ci` 和 `npm run login`，生成自己的 `auth.json`。
+3. 把 `auth.json` 的内容写入自己仓库的 Actions Secret：
 
 ```powershell
 Get-Content -Raw .\auth.json | gh secret set MARVEL_SNAP_AUTH_JSON
