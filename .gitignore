@@ -1,0 +1,10 @@
+node_modules/
+profile/
+auth.json
+last-result.json
+state.json
+*.log
+
+# Local Windows launchers are not needed by GitHub Actions.
+*.ps1
+README.txt

@@ -1,0 +1,15 @@
+{
+  "name": "marvel-snap-shop-daily-reward",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node marvel-snap-reward.js --check",
+    "claim": "node marvel-snap-reward.js",
+    "login": "node marvel-snap-reward.js --login",
+    "export-auth": "node marvel-snap-reward.js --export-auth"
+  },
+  "dependencies": {
+    "playwright-core": "^1.55.0"
+  }
+}

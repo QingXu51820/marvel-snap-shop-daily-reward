@@ -1,0 +1,65 @@
+name: MARVEL SNAP Daily Reward
+
+on:
+  workflow_dispatch:
+  schedule:
+    # GitHub scheduled jobs use UTC. Beijing time is UTC+8.
+    # 09:10 and 21:10 Beijing time, with the second run as a retry.
+    - cron: "10 1 * * *"
+    - cron: "10 13 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: marvel-snap-daily-reward
+  cancel-in-progress: false
+
+jobs:
+  claim:
+    name: Check and claim
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MARVEL_SNAP_AUTH_JSON: ${{ secrets.MARVEL_SNAP_AUTH_JSON }}
+      MARVEL_SNAP_PROXY: ${{ secrets.MARVEL_SNAP_PROXY }}
+      TZ: Asia/Shanghai
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Claim daily free reward
+        run: node marvel-snap-reward.js
+
+      - name: Write run summary
+        if: always()
+        shell: bash
+        run: |
+          echo "### MARVEL SNAP Daily Reward" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Result file: last-result.json" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f last-result.json ]; then
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat last-result.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: marvel-snap-result
+          path: |
+            last-result.json
+            marvel-snap-reward.log
+          if-no-files-found: warn
